@@ -19,6 +19,7 @@ const useGlobalStyles = (
       body: {
         margin: 0,
         height: "100%",
+        placeItems: "unset",
         WebkitFontSmoothing: "antialiased",
         MozOsxFontSmoothing: "grayscale",
       },

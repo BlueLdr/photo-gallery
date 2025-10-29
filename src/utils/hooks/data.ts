@@ -1,8 +1,6 @@
-"use client";
-
 import { useCallback, useMemo, useRef, useState } from "react";
 
-import { createRemotePromise } from "@mcmm/utils";
+import { createRemotePromise } from "~/utils";
 
 import { loadStorage, setStorage } from "../helpers";
 

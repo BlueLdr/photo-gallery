@@ -1,5 +1,3 @@
-"use client";
-
 import { createTheme, unstable_createMuiStrictModeTheme } from "@mui/material/styles";
 
 import { createSizes } from "./sizes";

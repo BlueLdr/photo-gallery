@@ -1,10 +1,10 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
+import js from "@eslint/js";
+import globals from "globals";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+import tseslint from "typescript-eslint";
 import eslintImport from "eslint-plugin-import";
-import { defineConfig, globalIgnores } from 'eslint/config'
+import { defineConfig, globalIgnores } from "eslint/config";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
@@ -34,17 +34,14 @@ const muiExternalImportsOrder = [
 
 const muiComponentImportsOrder = ["@mui/material/**", "@mui/icons-material/*"];
 
-
 export const importConfig = {
   parser: "@typescript-eslint/parser",
   extends: ["plugin:@typescript-eslint/recommended"],
-  plugins: {"import": eslintImport},
+  plugins: { import: eslintImport },
   overrides: [
     {
       files: ["**/*.{ts,tsx}"],
-      rules: {
-
-      },
+      rules: {},
     },
   ],
   ignorePatterns: ["dist/**/*", "**/*.html", "**/*.min.js"],
@@ -71,14 +68,14 @@ export const overridesCompat = new FlatCompat({
 });
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(["dist"]),
   {
-    files: ['src/**/*.{ts,tsx,cts,mts,js,jsx,cjs,mjs}'],
-    plugins: {"import": eslintImport},
+    files: ["src/**/*.{ts,tsx,cts,mts,js,jsx,cjs,mjs}"],
+    plugins: { import: eslintImport },
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
-      reactHooks.configs['recommended-latest'],
+      reactHooks.configs["recommended-latest"],
       reactRefresh.configs.vite,
     ],
     languageOptions: {
@@ -101,8 +98,7 @@ export default defineConfig([
             "@mui/*/*/**",
             "@mui/material",
             "@mui/icons-material",
-            "~/components/**/*",
-            "~/components/!(routes)",
+            "~/components/*/*",
             "~/utils/**",
             "~/theme/**",
             "~/app/**",
@@ -153,16 +149,15 @@ export default defineConfig([
       "import/parsers": {
         "@typescript-eslint/parser": [".ts", ".tsx"],
       },
-      "import/extensions": ['.ts', '.tsx'],
+      "import/extensions": [".ts", ".tsx"],
       "import/resolver": {
         node: {
-          moduleDirectory: ["node_modules", "src"]
+          moduleDirectory: ["node_modules", "src"],
         },
         typescript: {
           project: ["./tsconfig.app.json"],
         },
       },
-    }
+    },
   },
-])
-
+]);

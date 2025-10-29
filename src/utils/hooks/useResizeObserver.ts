@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect } from "react";
 
 //================================================
@@ -11,7 +9,7 @@ export type ResizeObserverEntryCallback = (
 
 const map = new Map<Element, ResizeObserverEntryCallback>();
 const observer =
-  "ResizeObserver" in global
+  typeof ResizeObserver !== "undefined"
     ? new ResizeObserver((entries, observer) => {
         for (const entry of entries) {
           const callback = map.get(entry.target);

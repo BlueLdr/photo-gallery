@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useEffect, useState } from "react";
 
 import { useValueRef } from "~/utils";
@@ -21,7 +19,7 @@ const createIntersectionObserver = (
   callbacks: Map<Element, IntersectionObserverEntryCallback>,
   options?: UseIntersectionObserverOptions,
 ) =>
-  "IntersectionObserver" in global
+  typeof IntersectionObserver !== "undefined"
     ? new IntersectionObserver(
         (entries, observer) => {
           for (const entry of entries) {
