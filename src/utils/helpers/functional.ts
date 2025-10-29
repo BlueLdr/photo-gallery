@@ -1,0 +1,69 @@
+export interface DebouncedFunc<T extends (...args: any[]) => any> {
+  (...args: Parameters<T>): void;
+
+  cancel(): void;
+}
+
+export const debounce = <T extends (...args: any[]) => any>(
+  func: T,
+  delay: number,
+): DebouncedFunc<T> => {
+  let timer: any = null;
+  const invoke: DebouncedFunc<T> = (...args: Parameters<T>) => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+      func(...args);
+      timer = null;
+    }, delay);
+  };
+  invoke.cancel = () => {
+    clearTimeout(timer);
+    timer = null;
+  };
+
+  return invoke;
+};
+
+//================================================
+
+export const awaitTimeout = (delay: number) =>
+  new Promise<void>(resolve => {
+    setTimeout(() => resolve(), delay);
+  });
+
+//================================================
+
+export const pluralize = (word: string, count: number) => {
+  if (count === 1) {
+    return word;
+  }
+  if (word.endsWith("y")) {
+    return word.replace(/y$/, "ies");
+  }
+  if (word.endsWith("s")) {
+    return `${word}es`;
+  }
+  return `${word}s`;
+};
+
+//================================================
+
+export type PromiseRemote<T> = { resolve: (value: T) => void; reject: (error?: any) => void };
+export const createRemotePromise = <T>() => {
+  if (Promise.withResolvers) {
+    const { promise, resolve, reject } = Promise.withResolvers<T>();
+    return [promise, { current: { resolve, reject } }] as const;
+  }
+  const remote = { current: undefined as PromiseRemote<T> | undefined };
+  const promise = new Promise<T>((resolve, reject) => {
+    remote.current = { resolve, reject };
+  });
+  return [promise, remote] as const;
+};
+
+//================================================
+
+export const getVariableInterval = (interval: number) =>
+  interval + (Math.random() * 0.5 * interval - 0.25 * interval);

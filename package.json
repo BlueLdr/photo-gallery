@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky"
   },
   "dependencies": {
     "@emotion/cache": "11.14.0",
@@ -18,9 +19,11 @@
     "@mui/material": "7.3.4",
     "dexie": "4.2.1",
     "dexie-react-hooks": "4.2.0",
+    "exifreader": "4.32.0",
     "lodash": "4.17.21",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "react-router": "7.9.5"
   },
   "devDependencies": {
     "@eslint/compat": "1.4.0",
@@ -43,7 +46,8 @@
     "prettier": "3.6.2",
     "typescript": "5.9.3",
     "typescript-eslint": "8.46.2",
-    "vite": "7.1.12"
+    "vite": "7.1.12",
+    "vite-tsconfig-paths": "5.1.4"
   },
   "lint-staged": {
     "**/src/**/*.{js,jsx,ts,tsx,css,scss,md,graphql,json,yaml,yml}": [

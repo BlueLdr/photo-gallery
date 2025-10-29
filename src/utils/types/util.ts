@@ -1,0 +1,32 @@
+export type ValuesOf<T extends object> = {
+  [K in keyof T]: T[K];
+}[keyof T];
+
+export type EntryOf<T> = { [K in keyof T]: [K, T[K]] }[keyof T];
+
+export type PropsOfType<T extends object, U> = {
+  [K in keyof T]: T[K] extends U ? K : never;
+}[keyof T];
+
+export type StringPropOf<T extends object> = PropsOfType<T, string>;
+
+export type WithStateHook<Name extends string, T> = Record<Name, T> &
+  Record<`set${Capitalize<Name>}`, React.Dispatch<React.SetStateAction<T>>>;
+
+export type ValueAndSetter<Name extends string, T> = Record<Name, T> &
+  Record<`set${Capitalize<Name>}`, (value: T) => void>;
+
+export type DistributiveOmit<T, K> = T extends any ? Pick<T, Exclude<keyof T, K>> : never;
+export type DistributivePick<T, K> = T extends any ? Pick<T, Extract<keyof T, K>> : never;
+export type DistributiveIndex<T, K extends keyof T> =
+  DistributivePick<T, K> extends infer R ? (K extends keyof R ? R[K] : never) : never;
+
+export type Scalar = string | number | boolean;
+
+export type DeepPartial<T extends object> = {
+  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
+};
+
+export type AtLeastOneRequired<T extends object> = {
+  [K in keyof T]: Required<Pick<T, K>> & Partial<Omit<T, K>>;
+}[keyof T];

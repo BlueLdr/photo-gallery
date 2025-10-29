@@ -156,7 +156,7 @@ export default defineConfig([
       "import/extensions": ['.ts', '.tsx'],
       "import/resolver": {
         node: {
-          moduleDirectory: ["node_modules", "./src", "./public"]
+          moduleDirectory: ["node_modules", "src"]
         },
         typescript: {
           project: ["./tsconfig.app.json"],
