@@ -11,6 +11,16 @@ import type { CircularProgressProps } from "@mui/material/CircularProgress";
 
 //================================================
 
+const fractionOfSize = (size: number | string | undefined, denominator: number, asPx?: boolean) => {
+  if (typeof size === "number" || !isNaN(Number(size))) {
+    const value = Number(size) / denominator;
+    return asPx ? `${value}px` : value;
+  }
+  if (typeof size === "string") {
+    return `calc(${size} / ${denominator})`;
+  }
+};
+
 export type ProgressIndicatorProps = Omit<CircularProgressProps, "variant"> & {
   variant?: "linear" | "circular";
   total?: number;
@@ -57,7 +67,7 @@ export function ProgressIndicator({
 
   if (variant === "circular") {
     return withTooltip(
-      <Grid position="relative" height={size} width={size}>
+      <Grid position="relative" height={size} width={fractionOfSize(size, 0.25)}>
         <CircularProgress
           sx={{ position: "absolute", color: theme => theme.palette.background.layer }}
           variant="determinate"
@@ -102,13 +112,22 @@ export function ProgressIndicator({
       direction="column"
       p={4}
       spacing={3}
+      width={fractionOfSize(size, 0.25)}
     >
       {labelText != null && (
         <Typography variant="caption">
           {tooltipText ? withTooltip(labelText) : labelText}
         </Typography>
       )}
-      <LinearProgress {...props} {...progressProps} sx={{ width: "100%" }} />
+      <LinearProgress
+        {...props}
+        {...progressProps}
+        sx={{
+          width: "100%",
+          height: fractionOfSize(size, 12, true),
+          borderRadius: fractionOfSize(size, 36, true),
+        }}
+      />
     </Grid>
   );
 }

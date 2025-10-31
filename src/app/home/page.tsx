@@ -1,111 +1,80 @@
-import { useCallback, useEffect, useState } from "react";
-import * as ExifReader from "exifreader";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { loadAllFilesInSubdirectories, getImageThumbnailDataUri } from "~/utils";
+import { bulkLoadImageData, loadAllFilesInSubdirectories, SUPPORTED_EXTENSIONS } from "~/utils";
 
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardHeader from "@mui/material/CardHeader";
+import { UploadBox } from "./UploadBox";
+import { Album } from "../album";
+
 import Grid from "@mui/material/Grid";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import Typography from "@mui/material/Typography";
+
+import type { ApiResponse, ImageMetadata } from "~/utils";
 
 //================================================
 
 export function HomePage() {
-  const [hovered, setHovered] = useState(false);
   const [dataTransfer, setDataTransfer] = useState<DataTransfer>();
+  const startedLoadingFiles = useRef(false);
+  const startedLoadingData = useRef(false);
 
-  const onDrop = useCallback((e: React.DragEvent) => {
-    setHovered(false);
-    e.preventDefault();
-    setDataTransfer(e.dataTransfer);
+  const [title, setTitle] = useState<string>();
+  const [files, setFiles] = useState<(FileSystemFileEntry | File)[]>();
+  const [loadedCount, setLoadedCount] = useState(0);
+  const [imageDataPromise, setImageDataPromise] = useState<Promise<ApiResponse<ImageMetadata[]>>>();
+
+  const reset = useCallback(() => {
+    setDataTransfer(undefined);
+    setTitle(undefined);
+    setFiles(undefined);
+    setImageDataPromise(undefined);
+    setLoadedCount(0);
+    startedLoadingFiles.current = false;
+    startedLoadingData.current = false;
   }, []);
-
-  const [entries, setEntries] = useState<FileSystemFileEntry[]>();
-  const [sample, setSample] = useState<ExifReader.Tags>();
 
   useEffect(() => {
     const dir = dataTransfer?.items[0].webkitGetAsEntry();
-    if (dir instanceof FileSystemDirectoryEntry) {
-      loadAllFilesInSubdirectories(dir).then(files => setEntries(files));
+    if (dir instanceof FileSystemDirectoryEntry && !startedLoadingFiles.current) {
+      setTitle(dir.name);
+      startedLoadingFiles.current = true;
+      loadAllFilesInSubdirectories(dir, SUPPORTED_EXTENSIONS).then(files => {
+        startedLoadingData.current = false;
+        setFiles(files);
+      });
     }
+    return reset;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataTransfer]);
 
   useEffect(() => {
-    if (entries?.length) {
-      entries[0].file(file => {
-        console.log(`file: `, file);
-        ExifReader.load(file).then(tags => {
-          setSample(tags);
-        });
-      });
+    if (files && !startedLoadingData.current) {
+      startedLoadingData.current = true;
+      setImageDataPromise(bulkLoadImageData(files, setLoadedCount));
     }
-  }, [entries]);
+  }, [files]);
 
-  console.log(`sample: `, sample);
+  if (files && imageDataPromise) {
+    return (
+      <Album
+        imageData={imageDataPromise}
+        loadedCount={loadedCount}
+        totalCount={files.length}
+        reset={reset}
+        title={title}
+      />
+    );
+  }
 
   return (
     <Grid
       container
       direction="column"
-      width="100vw"
+      width="100%"
       height="100%"
       alignItems="center"
       justifyContent="center"
       gap={8}
     >
-      <Grid
-        container
-        direction="column"
-        width="20rem"
-        height="16rem"
-        alignItems="center"
-        justifyContent="center"
-        border="4px dashed"
-        borderRadius="1rem"
-        onDragEnter={() => setHovered(true)}
-        onDragLeave={() => setHovered(false)}
-        onDragOver={e => {
-          setHovered(true);
-          e.preventDefault();
-        }}
-        onDropCapture={onDrop}
-        {...(hovered
-          ? {
-              borderColor: "primary.light",
-              bgcolor: "primary.dark",
-            }
-          : {
-              borderColor: "divider",
-            })}
-      >
-        <Typography onDragEnterCapture={e => e.preventDefault()}>
-          Drag and drop a folder of photos here
-        </Typography>
-      </Grid>
-
-      {entries && (
-        <Card>
-          <CardContent>
-            <List>
-              {entries?.slice(0, 10).map(entry => (
-                <ListItem key={entry.fullPath}>{entry.fullPath}</ListItem>
-              ))}
-            </List>
-          </CardContent>
-        </Card>
-      )}
-      {sample && (
-        <Card>
-          <CardHeader title={entries?.[0].name}></CardHeader>
-          <CardContent>
-            <pre>{JSON.stringify(sample, null, "  ")}</pre>
-            {sample.Thumbnail && <img src={getImageThumbnailDataUri(sample)} />}
-          </CardContent>
-        </Card>
-      )}
+      <UploadBox setDataTransfer={setDataTransfer} setFiles={setFiles} reset={reset} />
     </Grid>
   );
 }

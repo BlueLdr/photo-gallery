@@ -25,8 +25,9 @@ const useGlobalStyles = (
       },
       "#root": {
         display: "grid",
-        gridTemplateColumns: "auto 1fr",
+        gridTemplateColumns: "1fr",
         minHeight: "100vh",
+        width: "100%",
       },
     }}
   />

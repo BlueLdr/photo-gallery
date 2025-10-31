@@ -10,6 +10,7 @@ const SiteContainer = styled(Box)`
   display: flex;
   flex-direction: column;
   flex: 1 1 100%;
+  height: 100%;
 `;
 SiteContainer.displayName = "styled(SiteContainer)";
 
@@ -18,6 +19,7 @@ const Body = styled.main`
   flex-direction: column;
   flex: 1 1 100%;
   box-sizing: border-box;
+  height: 100%;
 
   & > .pending-view,
   & > * > .pending-view {

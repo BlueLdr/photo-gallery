@@ -3,4 +3,5 @@ export * from "./dom";
 export * from "./exif";
 export * from "./functional";
 export * from "./fs";
+export * from "./model";
 export * from "./storage";

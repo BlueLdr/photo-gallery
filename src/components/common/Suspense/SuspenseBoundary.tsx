@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { UseTransitionProvider } from "./transition-context";
+import { UseTransitionProvider } from "./TransitionProvider";
 import { ErrorBoundary } from "./ErrorBoundary";
 
 //================================================

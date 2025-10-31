@@ -1,4 +1,4 @@
-import type { EntryOf, PropsOfType } from "~/utils";
+import type { ApiResponse, EntryOf, PropsOfType } from "~/utils";
 
 //================================================
 
@@ -33,45 +33,37 @@ export const comparator =
     );
   };
 
-export const gameVersionComparator = <T extends string>(a: T, b: T) => {
-  const [, aMinor, aPatch = 0] = a.split(".");
-  const [, bMinor, bPatch = 0] = b.split(".");
-
-  const result = Number(aMinor) - Number(bMinor) || Number(aPatch) - Number(bPatch);
-  return isNaN(result) ? 0 : result;
-};
-
-interface GetMinGameVersion {
-  <T extends string>(a: T, b: T | undefined): T;
-
-  <T extends string>(a: T | undefined, b: T): T;
-
-  <T extends string>(a: T | undefined, b: T | undefined): T | undefined;
-}
-
-export const getMinGameVersion = ((a, b) => {
-  if (a == null && b == null) {
-    return undefined;
-  }
-  if (a == null) {
-    return b;
-  }
-  if (b == null) {
-    return a;
-  }
-  return gameVersionComparator(a, b) > 0 ? b : a;
-}) as GetMinGameVersion;
-
-export const validateGameVersionRange = (versions: { min: string; max: string }) => {
-  if (gameVersionComparator(versions.min, versions.max) > 0) {
-    const temp = versions.max;
-    versions.max = versions.min;
-    versions.min = temp;
-  }
-};
-
 export const makeRecordFromEntries = <Key extends string | number, Value>(
   entries: [Key, Value][],
 ) => Object.fromEntries(entries) as Record<Key, Value>;
 
-export const gameVersionRegex = /^1(\.\d{1,2}){1,2}$/i;
+export type PromiseMap<T> = {
+  [K in keyof T]: Promise<ApiResponse<T[K]>>;
+};
+
+export const promiseAll = async <T>(promises: PromiseMap<T>): Promise<ApiResponse<T>> => {
+  const isArray = Array.isArray(promises);
+  const keys = Object.keys(promises) as (keyof T)[];
+  const promiseResults = await Promise.allSettled(Object.values(promises));
+  for (const res of promiseResults) {
+    if (res.status === "rejected") {
+      return Promise.reject(res.reason);
+    }
+    /*if ((res.value as ApiResponse<any>).error) {
+      return Promise.reject(res.value);
+    }*/
+  }
+
+  return {
+    data: keys.reduce(
+      <K extends keyof T>(obj: T, key: K, i: number) => {
+        obj[isArray ? (Number(key) as K) : key] = (
+          promiseResults[i] as PromiseFulfilledResult<ApiResponse<T[K]>>
+        ).value.data!;
+        return obj;
+      },
+      (isArray ? [] : {}) as T,
+    ),
+    error: undefined,
+  };
+};
