@@ -6,7 +6,7 @@ export interface FileMetaDbEntry {
   filename: string;
   path: string;
   mimeType: string;
-  dateCreated?: number | undefined;
+  dateCreated?: number;
   lastModified: number;
   keywords: string[];
   rawCategories: string[];

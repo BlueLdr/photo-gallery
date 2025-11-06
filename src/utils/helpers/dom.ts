@@ -85,3 +85,22 @@ export const downloadBlob = (blob: Blob, filename: string) => {
   link.click();
   document.body.removeChild(link);
 };
+
+//================================================
+
+export const applyRef = <T>(ref: React.ForwardedRef<T>, instance: T | null) => {
+  if (!ref) {
+    return;
+  }
+  if (typeof ref === "function") {
+    ref(instance);
+  } else {
+    ref.current = instance;
+  }
+};
+
+export const combineRefs =
+  <T>(...refs: React.ForwardedRef<T>[]): React.RefCallback<T> =>
+  (instance: T | null) => {
+    refs.forEach(ref => applyRef(ref, instance));
+  };

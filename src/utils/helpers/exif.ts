@@ -14,10 +14,41 @@ export const isExifOrientation = (value: number): value is ExifOrientation =>
     ExifOrientation.Rotate270Clockwise,
   ].includes(value);
 
-export const parseNumberTagValue = (tag: {
-  value: string | number | unknown;
-  description: string;
-}) => {
+export const parseStringTagValue = (
+  tag:
+    | {
+        value: string | number | unknown;
+        description: string;
+      }
+    | undefined,
+  separator = ", ",
+) => {
+  if (!tag) {
+    return undefined;
+  }
+  if (typeof tag.value === "number") {
+    return `${tag.value}`;
+  }
+  if (typeof tag.value === "string") {
+    return tag.value;
+  }
+  if (Array.isArray(tag.value) && tag.value.every(v => typeof v === "string")) {
+    return tag.value.join(separator);
+  }
+  return undefined;
+};
+
+export const parseNumberTagValue = (
+  tag:
+    | {
+        value: string | number | unknown;
+        description: string;
+      }
+    | undefined,
+) => {
+  if (!tag) {
+    return undefined;
+  }
   if (typeof tag.value === "number") {
     return tag.value;
   }
@@ -50,10 +81,10 @@ export const getImageThumbnailDataUri = async (
 };
 
 export const getOriginalDate = (tags: Pick<Tags, "DateTimeOriginal" | "OffsetTimeOriginal">) => {
-  if (!tags.DateTimeOriginal) {
+  if (!tags.DateTimeOriginal?.value) {
     return null;
   }
-  return new Date(`${tags.DateTimeOriginal} ${tags.OffsetTimeOriginal ?? ""}`);
+  return new Date(`${tags.DateTimeOriginal?.value} ${tags.OffsetTimeOriginal?.value ?? ""}`);
 };
 
 export const getRotation = (

@@ -33,7 +33,6 @@ export type ProgressIndicatorProps = Omit<CircularProgressProps, "variant"> & {
 export function ProgressIndicator({
   variant = "linear",
   value,
-  color,
   total,
   tooltipText,
   labelText,

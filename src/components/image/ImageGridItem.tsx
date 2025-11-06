@@ -1,45 +1,26 @@
 import { alpha } from "@mui/material/styles";
+import { useEffect, useRef } from "react";
+import { THUMBNAIL_SIZE_STYLES } from "~/components/image/constants";
 
-import { Thumbnail } from "~/components/common";
+import { combineRefs, ImageThumbnailSize, joinClassNames } from "~/utils";
+
+import { Thumbnail } from "./Thumbnail";
 
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 
+import type { DistributiveOmit } from "~/utils";
 import type { OverrideProps } from "@mui/types";
 import type { GridTypeMap } from "@mui/material/Grid";
-import type { TypographyProps } from "@mui/material/Typography";
-import { type DistributiveOmit, type ImageMetadata, joinClassNames } from "~/utils";
+import type { ImageMetadata } from "~/model";
 
 //================================================
 
-const SIZE_MAP: Record<
-  Required<ImageGridItemProps>["size"],
-  { tile: number; image: number; radius: number; font: TypographyProps["variant"] }
-> = {
-  small: {
-    tile: 128,
-    image: 96,
-    radius: 6,
-    font: "caption",
-  },
-  medium: {
-    tile: 196,
-    image: 144,
-    radius: 10,
-    font: "body1",
-  },
-  large: {
-    tile: 320,
-    image: 256,
-    radius: 18,
-    font: "h6",
-  },
-};
-
 export type ImageGridItemCustomProps = {
-  size?: "small" | "medium" | "large";
+  size?: ImageThumbnailSize;
   image: ImageMetadata;
   selected?: boolean;
+  showOnSelected?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -55,21 +36,31 @@ export type ImageGridItemProps<D extends React.ElementType = GridTypeMap["defaul
 export function ImageGridItem<D extends React.ElementType = GridTypeMap["defaultComponent"]>({
   image,
   component,
-  size = "medium",
+  size = ImageThumbnailSize.md,
   sx,
   className,
   selected,
+  showOnSelected,
+  ref,
   ...props
 }: ImageGridItemProps<D>) {
-  const sizes = SIZE_MAP[size];
+  const rootRef = useRef<HTMLDivElement>(null);
+  const sizes = THUMBNAIL_SIZE_STYLES[size];
+
+  useEffect(() => {
+    if (showOnSelected && selected) {
+      rootRef.current?.scrollIntoView({ behavior: "smooth", inline: "nearest" });
+    }
+  }, [selected, showOnSelected]);
+
   return (
     <Grid
+      ref={combineRefs(ref, rootRef)}
       component={component}
       className={joinClassNames(className, selected && "Mui-selected")}
       container
       direction="column"
       gap={2}
-      p={2}
       alignItems="center"
       tabIndex={props.onClick ? 0 : undefined}
       sx={{
@@ -90,6 +81,7 @@ export function ImageGridItem<D extends React.ElementType = GridTypeMap["default
         "&.Mui-selected": {
           backgroundColor: theme => alpha(theme.palette.primary.dark, 0.6),
         },
+        padding: `${sizes.padding}px`,
         ...sx,
       }}
       {...props}

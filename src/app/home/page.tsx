@@ -7,7 +7,8 @@ import { Album } from "../album";
 
 import Grid from "@mui/material/Grid";
 
-import type { ApiResponse, ImageMetadata } from "~/utils";
+import type { ImageMetadata } from "~/model";
+import type { ApiResponse } from "~/utils";
 
 //================================================
 

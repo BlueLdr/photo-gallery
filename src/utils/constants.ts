@@ -21,3 +21,17 @@ export const SUPPORTED_EXTENSIONS = [".jpg", ".jpeg"];
 
 export const NULL_IMAGE =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+export enum ImageGalleryLayout {
+  Carousel = "carousel",
+  Grid = "grid",
+  Masonry = "masonry",
+}
+
+export enum ImageThumbnailSize {
+  xs = 1,
+  sm,
+  md,
+  lg,
+  xl,
+}

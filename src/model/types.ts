@@ -1,11 +1,16 @@
 import type * as ExifReader from "exifreader";
 import type { FileMetaDbEntry } from "~/db";
+import type { ImageTag } from "./tag";
 
 //================================================
 
+export interface ImageFileMetadata extends FileMetaDbEntry {
+  tags: ImageTag[];
+}
+
 export interface ImageMetadata {
   tags: ExifReader.Tags;
-  meta: FileMetaDbEntry;
+  meta: ImageFileMetadata;
   thumbnailSrc?: string;
   src: string;
 }

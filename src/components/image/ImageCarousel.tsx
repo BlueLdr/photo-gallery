@@ -1,9 +1,12 @@
-import { useTheme } from "@mui/material/styles";
-import { styled } from "@mui/material/styles";
-import { useEffect, useState } from "react";
+import { styled, useTheme } from "@mui/material/styles";
+import { useContext, useEffect, useState } from "react";
 import { TransitionGroup } from "react-transition-group";
 
-import { ImageGridItem, ImageView, ScrollButtons } from "~/components/common";
+import { ScrollButtons } from "~/components/common";
+import { ViewContext } from "~/context";
+
+import { ImageGridItem } from "./ImageGridItem";
+import { ImageView } from "./ImageView";
 
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -13,7 +16,7 @@ import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 
 import type { BoxProps } from "@mui/material/Box";
-import type { ImageMetadata } from "~/utils";
+import type { ImageMetadata } from "~/model";
 
 //================================================
 
@@ -30,6 +33,8 @@ export type ImageCarouselProps = { images: ImageMetadata[]; initialIndex?: numbe
 
 export function ImageCarousel({ images, initialIndex = 0, ...props }: ImageCarouselProps) {
   const theme = useTheme();
+  const { size } = useContext(ViewContext);
+
   const [activeIndex, setActiveIndex] = useState(() => (images[initialIndex] ? initialIndex : 0));
   const [prevIndex, setPrevIndex] = useState<number>();
   const [nextIndex, setNextIndex] = useState<number>();
@@ -87,6 +92,7 @@ export function ImageCarousel({ images, initialIndex = 0, ...props }: ImageCarou
         justifyContent="space-around"
         alignItems="center"
         gap={2}
+        pt={4}
         flexWrap="nowrap"
         height="100%"
         tabIndex={0}
@@ -103,6 +109,7 @@ export function ImageCarousel({ images, initialIndex = 0, ...props }: ImageCarou
             key={activeIndex}
             direction={direction}
             className={nextIndex != undefined ? "MuiSlide-out" : undefined}
+            appear={!!direction}
             unmountOnExit
             onEntered={() => {
               setPrevIndex(undefined);
@@ -151,9 +158,11 @@ export function ImageCarousel({ images, initialIndex = 0, ...props }: ImageCarou
           <Grid container alignItems="center" gap={4} sx={{ overflowX: "auto" }} p={2}>
             {images.map((image, i) => (
               <ImageGridItem
+                size={size}
                 image={image}
                 selected={i === activeIndex}
                 onClick={() => setNextIndex(i)}
+                showOnSelected
               />
             ))}
           </Grid>

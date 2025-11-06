@@ -2,8 +2,10 @@ import * as ExifReader from "exifreader";
 
 import { getDbEntryFromFileAndTags } from "~/db";
 import { getFilePath, getImageThumbnailDataUri, loadEntryFileAsync, promiseAll } from "~/utils";
+import { ImageTag } from "~/model";
 
-import type { ApiResponse, ImageMetadata } from "~/utils";
+import type { ImageMetadata } from "~/model";
+import type { ApiResponse } from "~/utils";
 
 //================================================
 
@@ -17,7 +19,10 @@ export const loadImageData = (entry: FileSystemFileEntry | File) =>
             (thumbnailUrl): ApiResponse<ImageMetadata> => ({
               data: {
                 tags,
-                meta,
+                meta: {
+                  ...meta,
+                  tags: ImageTag.fromRawCategories(meta.rawCategories),
+                },
                 thumbnailSrc: thumbnailUrl,
                 src: URL.createObjectURL(file),
               },

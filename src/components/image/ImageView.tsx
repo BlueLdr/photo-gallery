@@ -6,7 +6,8 @@ import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import type { BoxProps } from "@mui/material/Box";
-import type { DistributiveOmit, ImageMetadata } from "~/utils";
+import type { ImageMetadata } from "~/model";
+import type { DistributiveOmit } from "~/utils";
 
 //================================================
 

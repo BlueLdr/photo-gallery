@@ -1,4 +1,10 @@
-import { getOriginalDate, getRating, getRawCategories, getRotation } from "~/utils";
+import {
+  getOriginalDate,
+  getRating,
+  getRawCategories,
+  getRotation,
+  parseNumberTagValue,
+} from "~/utils";
 
 import type { Tags } from "exifreader";
 import type { FileMetaDbEntry } from "~/db/types";
@@ -25,8 +31,8 @@ export const getDbEntryFromFileAndTags = (file: File, tags: Tags): FileMetaDbEnt
     lastModified: file.lastModified,
     keywords,
     rawCategories: getRawCategories(tags),
-    height: tags["Image Height"]?.value,
-    width: tags["Image Width"]?.value,
+    height: parseNumberTagValue(tags["Image Height"]),
+    width: parseNumberTagValue(tags["Image Width"]),
     rating: getRating(tags),
     rotation: getRotation(tags),
   };
