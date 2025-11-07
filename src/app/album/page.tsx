@@ -1,4 +1,4 @@
-import { use, useContext } from "react";
+import { use, useContext, useMemo } from "react";
 
 import {
   ErrorView,
@@ -13,7 +13,7 @@ import { ViewContext, ViewStateProvider } from "~/context";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 
-import type { ImageMetadata } from "~/model";
+import { createFuzzyImageSearch, type ImageMetadata } from "~/model";
 import type { ApiResponse } from "~/utils";
 
 //================================================
@@ -26,31 +26,26 @@ export type AlbumProps = {
   totalCount: number;
 };
 
-function AlbumContent({ imageData: imageDataPromise }: Omit<AlbumProps, "setLoadedCount">) {
-  const imageData = use(imageDataPromise);
-
-  const { layout, setLayout, size, setSize } = useContext(ViewContext);
-
-  if (imageData.error) {
-    return <ErrorView error={imageData.error} />;
-  }
+function AlbumContent({ imageData }: { imageData: ImageMetadata[] }) {
+  const { layout, size, search, filters } = useContext(ViewContext);
+  const imageSearch = useMemo(() => createFuzzyImageSearch(imageData), [imageData]);
+  const images = useMemo(() => {
+    const searchResults = search ? imageSearch?.(search).map(r => r.item) : imageData;
+    return filters.tags?.length
+      ? searchResults?.filter(img => img.meta.tags.some(tag => filters.tags?.includes(tag)))
+      : searchResults;
+  }, [filters.tags, imageData, imageSearch, search]);
 
   return (
     <Grid height="100%" position="relative">
-      <Grid position="absolute" top={16} left={16}>
-        <ViewSpeedDialControls
-          direction="right"
-          layout={layout}
-          setLayout={setLayout}
-          size={size}
-          setSize={setSize}
-        />
+      <Grid position="fixed" top={16} left={16} zIndex={20}>
+        <ViewSpeedDialControls direction="right" />
       </Grid>
       {layout === "grid" ? (
-        <ImageGrid images={imageData.data} maxHeight="100vh" maxWidth="100%" size={size} />
+        <ImageGrid images={images} maxHeight="100vh" maxWidth="100%" size={size} />
       ) : (
         <ImageCarousel
-          images={imageData.data}
+          images={images}
           maxHeight="100vh"
           maxWidth="100%"
           height="100%"
@@ -60,6 +55,16 @@ function AlbumContent({ imageData: imageDataPromise }: Omit<AlbumProps, "setLoad
       )}
     </Grid>
   );
+}
+
+function AlbumContainer({ imageData: imageDataPromise }: Omit<AlbumProps, "setLoadedCount">) {
+  const imageData = use(imageDataPromise);
+
+  if (imageData.error) {
+    return <ErrorView error={imageData.error} />;
+  }
+
+  return <AlbumContent imageData={imageData.data} />;
 }
 
 export function Album(props: AlbumProps) {
@@ -87,7 +92,7 @@ export function Album(props: AlbumProps) {
         </Typography>
       )}
       <ViewStateProvider>
-        <AlbumContent {...props} />
+        <AlbumContainer {...props} />
       </ViewStateProvider>
     </SuspenseBoundary>
   );

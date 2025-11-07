@@ -158,6 +158,7 @@ export function ImageCarousel({ images, initialIndex = 0, ...props }: ImageCarou
           <Grid container alignItems="center" gap={4} sx={{ overflowX: "auto" }} p={2}>
             {images.map((image, i) => (
               <ImageGridItem
+                key={image.meta.path}
                 size={size}
                 image={image}
                 selected={i === activeIndex}

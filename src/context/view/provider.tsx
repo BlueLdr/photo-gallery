@@ -4,7 +4,7 @@ import { ImageGalleryLayout, ImageThumbnailSize } from "~/utils";
 
 import { ViewContext } from "./context";
 
-import type { ImageMetadata } from "~/model";
+import type { FilterState, ImageMetadata } from "~/model";
 import type { WithChildren } from "~/utils";
 
 //================================================
@@ -15,10 +15,23 @@ export function ViewStateProvider({ children }: ViewStateProviderProps) {
   const [layout, setLayout] = useState(ImageGalleryLayout.Grid);
   const [size, setSize] = useState(ImageThumbnailSize.md);
   const [selectedImage, setSelectedImage] = useState<ImageMetadata>();
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState<FilterState>({});
 
   const value = useMemo(
-    () => ({ layout, setLayout, size, setSize, selectedImage, setSelectedImage }),
-    [layout, size, selectedImage],
+    () => ({
+      layout,
+      setLayout,
+      size,
+      setSize,
+      selectedImage,
+      setSelectedImage,
+      search,
+      setSearch,
+      filters,
+      setFilters,
+    }),
+    [layout, size, selectedImage, search, filters],
   );
 
   return <ViewContext value={value}>{children}</ViewContext>;

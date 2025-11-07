@@ -22,32 +22,41 @@ const horizontalStyles = {
   top: 0,
   bottom: 0,
 } satisfies SxStyleProps;
-const positionStyles = (size: Required<SpeedDialProps>["FabProps"]["size"]) => {
+const positionStyles = (size: Required<SpeedDialProps>["FabProps"]["size"], custom: boolean) => {
   const padding = size === "large" ? 16 : size === "medium" ? 14 : 12;
+  const borderRadius = `${padding * 2}px`;
   return {
     up: {
       ...verticalStyles,
       bottom: 0,
       paddingBottom: theme => theme.spacing(padding),
+      paddingTop: custom ? theme => theme.spacing(4) : undefined,
       marginBottom: 0,
+      borderRadius,
     },
     right: {
       ...horizontalStyles,
       left: 0,
       paddingLeft: theme => theme.spacing(padding),
+      paddingRight: custom ? theme => theme.spacing(4) : undefined,
       marginLeft: 0,
+      borderRadius,
     },
     down: {
       ...verticalStyles,
       top: 0,
       paddingTop: theme => theme.spacing(padding),
+      paddingBottom: custom ? theme => theme.spacing(4) : undefined,
       marginTop: 0,
+      borderRadius,
     },
     left: {
       ...horizontalStyles,
       right: 0,
       paddingRight: theme => theme.spacing(padding),
+      paddingLeft: custom ? theme => theme.spacing(4) : undefined,
       marginRight: 0,
+      borderRadius,
     },
   } satisfies Record<Required<SpeedDialProps>["direction"], SxStyleProps>;
 };
@@ -56,20 +65,22 @@ const positionStyles = (size: Required<SpeedDialProps>["FabProps"]["size"]) => {
 
 export type LayoutSelectorProps<T> = WithOverrides<
   SpeedDialProps,
-  ValueAndSetter<"value", T> & {
+  {
     defaultIcon?: React.ReactElement;
     openIcon?: React.ReactElement;
     icon?: never;
   } & (
-      | {
-          options: ControlOption<T>[];
-          children?: never;
-        }
-      | {
-          options?: never;
-          children: React.ReactNode;
-        }
-    )
+    | (ValueAndSetter<"value", T> & {
+        options: ControlOption<T>[];
+        children?: never;
+      })
+    | {
+        value?: never;
+        setValue?: never;
+        options?: never;
+        children: React.ReactNode;
+      }
+  )
 >;
 
 export function SpeedDialSelector<T extends string | number>({
@@ -79,6 +90,7 @@ export function SpeedDialSelector<T extends string | number>({
   defaultIcon,
   openIcon = <CloseIcon />,
   children,
+  sx,
   ...props
 }: LayoutSelectorProps<T>) {
   const [open, setOpen] = useState(false);
@@ -104,18 +116,28 @@ export function SpeedDialSelector<T extends string | number>({
         <SpeedDialIcon icon={SelectedIcon ? <SelectedIcon /> : defaultIcon} openIcon={openIcon} />
       }
       sx={{
+        ...sx,
         position: "relative",
+        "& .MuiSpeedDialIcon-icon":
+          SelectedIcon || defaultIcon
+            ? {
+                transform: "none !important",
+              }
+            : {},
         "& .MuiSpeedDial-actions": {
           gap: theme => theme.spacing(2),
           position: "absolute",
-          ...positionStyles(props.FabProps?.size ?? "medium")[props.direction ?? "up"],
+          ...positionStyles(props.FabProps?.size ?? "medium", !!children)[props.direction ?? "up"],
           backgroundColor: theme => alpha(theme.palette.grey["800"], 0),
-          borderRadius: 9999,
           transition: theme =>
             theme.transitions.create("backgroundColor", {
               duration: theme.transitions.duration.complex,
             }),
           "& > *:not(.MuiSpeedDialAction)": {
+            transition: theme =>
+              theme.transitions.create("opacity", {
+                duration: theme.transitions.duration.complex,
+              }),
             opacity: 0,
           },
         },
@@ -123,10 +145,6 @@ export function SpeedDialSelector<T extends string | number>({
           backgroundColor: theme => theme.palette.grey["800"],
           "& > *:not(.MuiSpeedDialAction)": {
             opacity: 1,
-            transition: theme =>
-              theme.transitions.create("opacity", {
-                duration: theme.transitions.duration.complex,
-              }),
           },
         },
       }}

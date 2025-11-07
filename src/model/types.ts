@@ -14,3 +14,7 @@ export interface ImageMetadata {
   thumbnailSrc?: string;
   src: string;
 }
+
+export type FilterState = {
+  tags?: ImageTag[];
+};

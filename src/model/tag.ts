@@ -1,15 +1,15 @@
 export class ImageTag {
   protected constructor(raw: string, parent?: ImageTag) {
-    this.raw = raw;
-    const [root, children] = ImageTag.parseRawCategoryString(raw);
-    this.root = root;
-    ImageTag.allTagsMap.set(ImageTag.getChildFullRawString(root, parent), this);
-    this._children = [];
+    const [name, children] = ImageTag.parseRawCategoryString(raw);
+    this.name = name;
+    this.value = ImageTag.getChildFullRawString(name, parent);
+    ImageTag.allTagsMap.set(this.value, this);
+    this._children = new Set();
     if (children) {
-      this._children.push(ImageTag.fromRawInternal(children, this));
+      this._children.add(ImageTag.fromRawInternal(children, this));
     }
     this._parent = parent;
-    parent?._children.push(this);
+    parent?._children.add(this);
   }
 
   public static readonly fromRawCategories = (rawCategories: string[]) =>
@@ -38,16 +38,21 @@ export class ImageTag {
     return this.fromRawInternal(children, tag);
   };
 
-  protected static readonly getChildFullRawString = (childRoot: string, parent?: ImageTag) =>
-    [parent?.raw, childRoot].filter(str => !!str).join(ImageTag.separatorChars[0]);
+  protected static readonly getChildFullRawString = (
+    childName: string,
+    parent?: ImageTag,
+  ): string =>
+    [parent ? ImageTag.getChildFullRawString(parent.name, parent.parent) : undefined, childName]
+      .filter(str => !!str)
+      .join(ImageTag.separatorChars[0]);
 
   public static readonly separatorChars = ["|", "/"];
-  public static readonly parseRawCategoryString = (raw: string): [root: string, child?: string] => {
+  public static readonly parseRawCategoryString = (raw: string): [name: string, child?: string] => {
     for (const char of this.separatorChars) {
-      const match = raw.match(new RegExp(`^[^${char}]+${char}[^${char}]+`, "i"));
+      const match = raw.match(new RegExp(`^([^\\${char}]+)\\${char}(.+)$`, "i"));
       if (match) {
-        const [, root, children] = match;
-        return [root, children];
+        const [, name, children] = match;
+        return [name, children];
       }
     }
     return [raw];
@@ -58,12 +63,15 @@ export class ImageTag {
     return Array.from(this.allTagsMap.values());
   };
 
-  readonly raw: string;
-  readonly root: string;
+  readonly value: string;
+  readonly name: string;
+  get id() {
+    return this.value;
+  }
 
-  private _children: ImageTag[];
+  private _children: Set<ImageTag>;
   get children() {
-    return this._children.slice();
+    return Array.from(this._children);
   }
 
   private _parent?: ImageTag;
@@ -72,6 +80,16 @@ export class ImageTag {
   }
 
   toString = () => {
-    return this.root;
+    return this.name;
+  };
+
+  getChildrenFlat = (includeParents?: boolean): ImageTag[] => {
+    return this.children.reduce((arr, child) => {
+      const children = child.getChildrenFlat();
+      if (includeParents && children.length) {
+        return [...arr, child, ...children];
+      }
+      return [...arr, ...children];
+    }, [] as ImageTag[]);
   };
 }

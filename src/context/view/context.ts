@@ -1,15 +1,17 @@
 import { createContext } from "react";
-import type { ImageMetadata } from "~/model";
 
 import { ImageGalleryLayout, ImageThumbnailSize } from "~/utils";
 
+import type { FilterState, ImageMetadata } from "~/model";
 import type { WithStateHook } from "~/utils";
 
 //================================================
 
 export type ViewState = WithStateHook<"layout", ImageGalleryLayout> &
   WithStateHook<"size", ImageThumbnailSize> &
-  WithStateHook<"selectedImage", ImageMetadata | undefined>;
+  WithStateHook<"selectedImage", ImageMetadata | undefined> &
+  WithStateHook<"search", string> &
+  WithStateHook<"filters", FilterState>;
 
 export const ViewContext = createContext<ViewState>({
   layout: ImageGalleryLayout.Grid,
@@ -18,4 +20,8 @@ export const ViewContext = createContext<ViewState>({
   setSize: () => undefined,
   selectedImage: undefined,
   setSelectedImage: () => undefined,
+  search: "",
+  setSearch: () => undefined,
+  filters: {},
+  setFilters: () => undefined,
 });
