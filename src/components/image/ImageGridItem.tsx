@@ -1,9 +1,9 @@
 import { alpha } from "@mui/material/styles";
 import { useEffect, useRef } from "react";
-import { THUMBNAIL_SIZE_STYLES } from "~/components/image/constants";
 
 import { combineRefs, ImageThumbnailSize, joinClassNames } from "~/utils";
 
+import { THUMBNAIL_SIZE_STYLES } from "./constants";
 import { Thumbnail } from "./Thumbnail";
 
 import Grid from "@mui/material/Grid";

@@ -88,7 +88,7 @@ export const downloadBlob = (blob: Blob, filename: string) => {
 
 //================================================
 
-export const applyRef = <T>(ref: React.ForwardedRef<T>, instance: T | null) => {
+export const applyRef = <T>(ref: React.ForwardedRef<T> | undefined, instance: T | null) => {
   if (!ref) {
     return;
   }
@@ -100,7 +100,7 @@ export const applyRef = <T>(ref: React.ForwardedRef<T>, instance: T | null) => {
 };
 
 export const combineRefs =
-  <T>(...refs: React.ForwardedRef<T>[]): React.RefCallback<T> =>
+  <T>(...refs: (React.ForwardedRef<T> | undefined)[]): React.RefCallback<T> =>
   (instance: T | null) => {
     refs.forEach(ref => applyRef(ref, instance));
   };

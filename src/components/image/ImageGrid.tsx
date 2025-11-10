@@ -1,5 +1,6 @@
-import { THUMBNAIL_SIZE_STYLES } from "~/components/image/constants";
 import { ImageThumbnailSize } from "~/utils";
+
+import { THUMBNAIL_SIZE_STYLES } from "./constants";
 import { ImageGridItem } from "./ImageGridItem";
 
 import Grid from "@mui/material/Grid";

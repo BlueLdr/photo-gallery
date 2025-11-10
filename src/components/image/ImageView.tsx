@@ -1,22 +1,30 @@
 import { useEffect, useState } from "react";
 
-import { classNameWithModifiers } from "~/utils";
+import { classNameWithModifiers, useOverlayVisibility } from "~/utils";
+
+import { ImageOverlay } from "./ImageOverlay";
 
 import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
 
+import type { SxStyleProps } from "~/theme";
 import type { BoxProps } from "@mui/material/Box";
 import type { ImageMetadata } from "~/model";
-import type { DistributiveOmit } from "~/utils";
+import type { OverlayVisibilityParams, DistributiveOmit } from "~/utils";
+import type { ImageOverlayProps } from "./ImageOverlay";
 
 //================================================
 
 export type FullImageProps = DistributiveOmit<BoxProps<"img", { component?: "img" }>, "src"> & {
   data: ImageMetadata;
+  overlay?: Omit<ImageOverlayProps, "image"> & OverlayVisibilityParams;
+  containerStyle?: SxStyleProps;
 };
 
-export function ImageView({ data, ...props }: FullImageProps) {
+export function ImageView({ data, overlay, containerStyle, ...props }: FullImageProps) {
   // const [img, setImg] = useState<HTMLImageElement>();
+
+  const { hidden, initialHidden, delay, ...overlayProps } = overlay ?? {};
+  const [overlayVisible, showOverlay] = useOverlayVisibility({ hidden, initialHidden, delay });
 
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
@@ -53,7 +61,7 @@ export function ImageView({ data, ...props }: FullImageProps) {
   return (
     <Box
       className={classNameWithModifiers("PgImageView", { "-container": true, "--loaded": loaded })}
-      display={loaded ? "contents" : "flex"}
+      display={overlay || !loaded ? "block" : "contents"}
       justifyContent="center"
       alignItems="center"
       position="relative"
@@ -61,6 +69,8 @@ export function ImageView({ data, ...props }: FullImageProps) {
       maxWidth="100%"
       height="100%"
       width="100%"
+      sx={containerStyle}
+      onMouseMove={showOverlay}
     >
       <Box
         component="img"
@@ -71,16 +81,14 @@ export function ImageView({ data, ...props }: FullImageProps) {
         src={data.src}
         onLoad={() => setLoaded(true)}
       />
-      {!loaded && (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          position="absolute"
-          sx={{ transform: "translate(-50%, -50%)" }}
-        >
-          <CircularProgress variant="indeterminate" />
-        </Box>
+      {(overlay || !loaded) && (
+        <ImageOverlay
+          visible={overlayVisible}
+          {...overlayProps}
+          image={data}
+          display="contents"
+          loading={!loaded}
+        />
       )}
     </Box>
   );

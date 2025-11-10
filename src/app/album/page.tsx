@@ -8,12 +8,14 @@ import {
   SuspenseBoundary,
 } from "~/components/common";
 import { ViewSpeedDialControls } from "~/components/controls";
+import { ImageMasonry, ImageModal } from "~/components/image";
 import { ViewContext, ViewStateProvider } from "~/context";
+import { createFuzzyImageSearch } from "~/model";
 
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 
-import { createFuzzyImageSearch, type ImageMetadata } from "~/model";
+import type { ImageMetadata } from "~/model";
 import type { ApiResponse } from "~/utils";
 
 //================================================
@@ -27,7 +29,8 @@ export type AlbumProps = {
 };
 
 function AlbumContent({ imageData }: { imageData: ImageMetadata[] }) {
-  const { layout, size, search, filters } = useContext(ViewContext);
+  const { layout, size, search, filters, selectedImage, setSelectedImage } =
+    useContext(ViewContext);
   const imageSearch = useMemo(() => createFuzzyImageSearch(imageData), [imageData]);
   const images = useMemo(() => {
     const searchResults = search ? imageSearch?.(search).map(r => r.item) : imageData;
@@ -36,13 +39,43 @@ function AlbumContent({ imageData }: { imageData: ImageMetadata[] }) {
       : searchResults;
   }, [filters.tags, imageData, imageSearch, search]);
 
+  const curIndex = selectedImage ? images?.indexOf(selectedImage) : undefined;
+  console.log(`curIndex, images: `, curIndex, images);
+
   return (
     <Grid height="100%" position="relative">
       <Grid position="fixed" top={16} left={16} zIndex={20}>
         <ViewSpeedDialControls direction="right" />
       </Grid>
+      <ImageModal
+        image={selectedImage}
+        closeModal={() => setSelectedImage(undefined)}
+        {...(curIndex != null && images
+          ? {
+              showNextImage:
+                curIndex < images.length - 1
+                  ? () => setSelectedImage(images[curIndex + 1])
+                  : undefined,
+              showPrevImage:
+                curIndex > 0 ? () => setSelectedImage(images[curIndex - 1]) : undefined,
+            }
+          : {})}
+      />
       {layout === "grid" ? (
-        <ImageGrid images={images} maxHeight="100vh" maxWidth="100%" size={size} />
+        <ImageGrid
+          images={images}
+          maxHeight="100vh"
+          maxWidth="100%"
+          size={size}
+          onClickItem={image => setSelectedImage(image)}
+        />
+      ) : layout === "masonry" ? (
+        <ImageMasonry
+          images={images}
+          sx={{ maxWidth: "100vw", width: "100%" }}
+          size={size}
+          onClickItem={image => setSelectedImage(image)}
+        />
       ) : (
         <ImageCarousel
           images={images}
@@ -50,7 +83,6 @@ function AlbumContent({ imageData }: { imageData: ImageMetadata[] }) {
           maxWidth="100%"
           height="100%"
           // size="large"
-          // onClickItem={image => setSelectedImage(image)}
         />
       )}
     </Grid>

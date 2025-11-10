@@ -29,7 +29,11 @@ const StyledTransitionGroup = styled(TransitionGroup)({
   },
 });
 
-export type ImageCarouselProps = { images: ImageMetadata[]; initialIndex?: number } & BoxProps;
+export type ImageCarouselProps = {
+  images: ImageMetadata[];
+  initialIndex?: number;
+  onClickItem?: (image: ImageMetadata) => void;
+} & BoxProps;
 
 export function ImageCarousel({ images, initialIndex = 0, ...props }: ImageCarouselProps) {
   const theme = useTheme();
