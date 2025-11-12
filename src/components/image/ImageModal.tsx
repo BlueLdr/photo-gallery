@@ -6,22 +6,17 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 
 import type { ImageMetadata } from "~/model";
+import type { ImageOverlayOptions } from "./ImageOverlay";
 
 //================================================
 
 export type ImageModalProps = {
   image: ImageMetadata | undefined;
   closeModal: () => void;
-  showNextImage?: () => void;
-  showPrevImage?: () => void;
+  overlay?: Omit<ImageOverlayOptions, "onClose">;
 };
 
-export function ImageModal({
-  image: target,
-  closeModal,
-  showPrevImage,
-  showNextImage,
-}: ImageModalProps) {
+export function ImageModal({ image: target, closeModal, overlay }: ImageModalProps) {
   const [open, image, TransitionProps] = useModalTarget(target);
 
   return (
@@ -31,12 +26,11 @@ export function ImageModal({
       onKeyDown={
         open
           ? e => {
-              console.log(`e.key: `, e.key);
               if (e.key === "ArrowLeft") {
-                showPrevImage?.();
+                overlay?.onClickPrev?.();
               }
               if (e.key === "ArrowRight") {
-                showNextImage?.();
+                overlay?.onClickNext?.();
               }
             }
           : undefined
@@ -81,8 +75,7 @@ export function ImageModal({
             }}
             overlay={{
               onClose: closeModal,
-              onClickPrev: showPrevImage,
-              onClickNext: showNextImage,
+              ...overlay,
             }}
           />
         )}

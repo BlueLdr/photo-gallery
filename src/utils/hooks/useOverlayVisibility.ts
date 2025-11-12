@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useDebouncedCallback } from "~/utils";
 
@@ -17,6 +17,13 @@ export const useOverlayVisibility = ({
 }: OverlayVisibilityParams) => {
   const [visible, setVisible] = useState(hidden === "dynamic" ? !initialHidden : !hidden);
   const hideOverlay = useDebouncedCallback(() => setVisible(false), [], delay);
+  useEffect(() => {
+    if (!initialHidden && hidden === "dynamic") {
+      hideOverlay();
+      return () => hideOverlay.cancel();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return [
     visible,
@@ -26,5 +33,6 @@ export const useOverlayVisibility = ({
           hideOverlay();
         }
       : undefined,
+    hidden === "dynamic" ? () => setVisible(false) : undefined,
   ] as const;
 };

@@ -5,3 +5,4 @@ export * from "./ImageMasonry";
 export * from "./ImageModal";
 export * from "./ImageView";
 export * from "./Thumbnail";
+export * from "./utils";

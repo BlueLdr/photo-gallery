@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type,@typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 
 import type { ThemeAdditions } from "~/theme";
 import type { PgBackgroundColors } from "./theme/colors";

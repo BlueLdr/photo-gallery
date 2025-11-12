@@ -17,4 +17,11 @@ export interface ImageMetadata {
 
 export type FilterState = {
   tags?: ImageTag[];
+  mode?: FilterMode;
 };
+
+export enum FilterMode {
+  Any = "any",
+  All = "all",
+  None = "none",
+}

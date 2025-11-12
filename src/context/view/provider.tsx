@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { FilterMode } from "~/model";
 import { ImageGalleryLayout, ImageThumbnailSize } from "~/utils";
 
 import { ViewContext } from "./context";
@@ -16,7 +17,7 @@ export function ViewStateProvider({ children }: ViewStateProviderProps) {
   const [size, setSize] = useState(ImageThumbnailSize.md);
   const [selectedImage, setSelectedImage] = useState<ImageMetadata>();
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState<FilterState>({});
+  const [filters, setFilters] = useState<FilterState>({ mode: FilterMode.Any });
 
   const value = useMemo(
     () => ({

@@ -15,7 +15,7 @@ import type { ImageOverlayProps } from "./ImageOverlay";
 //================================================
 
 export type FullImageProps = DistributiveOmit<BoxProps<"img", { component?: "img" }>, "src"> & {
-  data: ImageMetadata;
+  data: ImageMetadata | undefined;
   overlay?: Omit<ImageOverlayProps, "image"> & OverlayVisibilityParams;
   containerStyle?: SxStyleProps;
 };
@@ -24,14 +24,18 @@ export function ImageView({ data, overlay, containerStyle, ...props }: FullImage
   // const [img, setImg] = useState<HTMLImageElement>();
 
   const { hidden, initialHidden, delay, ...overlayProps } = overlay ?? {};
-  const [overlayVisible, showOverlay] = useOverlayVisibility({ hidden, initialHidden, delay });
+  const [overlayVisible, showOverlay, hideOverlay] = useOverlayVisibility({
+    hidden,
+    initialHidden,
+    delay,
+  });
 
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     return () => {
       setLoaded(false);
     };
-  }, [data.src]);
+  }, [data?.src]);
 
   /*  useEffect(() => {
     const cancel = { current: false };
@@ -71,16 +75,8 @@ export function ImageView({ data, overlay, containerStyle, ...props }: FullImage
       width="100%"
       sx={containerStyle}
       onMouseMove={showOverlay}
+      onMouseLeave={hideOverlay}
     >
-      <Box
-        component="img"
-        width={`${data.meta.width ?? ""}`}
-        height={`${data.meta.height ?? ""}`}
-        loading="eager"
-        {...props}
-        src={data.src}
-        onLoad={() => setLoaded(true)}
-      />
       {(overlay || !loaded) && (
         <ImageOverlay
           visible={overlayVisible}
@@ -90,6 +86,15 @@ export function ImageView({ data, overlay, containerStyle, ...props }: FullImage
           loading={!loaded}
         />
       )}
+      <Box
+        component="img"
+        width={`${data?.meta.width ?? ""}`}
+        height={`${data?.meta.height ?? ""}`}
+        loading="eager"
+        {...props}
+        src={data?.src}
+        onLoad={() => setLoaded(true)}
+      />
     </Box>
   );
 }

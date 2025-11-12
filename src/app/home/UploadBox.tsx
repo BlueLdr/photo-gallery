@@ -75,7 +75,7 @@ export function UploadBox({ setDataTransfer, reset, setFiles }: UploadBoxProps) 
         setInvalidUpload(true);
       }
     },
-    [reset],
+    [reset, setDataTransfer],
   );
 
   useEffect(() => {
@@ -126,7 +126,7 @@ export function UploadBox({ setDataTransfer, reset, setFiles }: UploadBoxProps) 
           <br />
         </Typography>
         <Typography variant="h5">Drag and drop a folder of photos here,</Typography>
-        <Typography variant="h5">or click to upload a folder</Typography>
+        <Typography variant="h5">or click to load a folder</Typography>
 
         <Typography variant="subtitle2" color="error">
           {invalidUpload ? "Invalid file" : <br />}

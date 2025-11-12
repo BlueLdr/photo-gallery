@@ -15,7 +15,7 @@ import FilterIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
 import Badge from "@mui/material/Badge";
 
-import type { ImageTag } from "~/model";
+import type { FilterMode, ImageTag } from "~/model";
 import type { FabProps } from "@mui/material/Fab";
 
 //================================================
@@ -41,6 +41,7 @@ export function ViewSpeedDialControls({ color, direction }: ViewSpeedDialControl
   const inputRef = useRef<HTMLInputElement>(null);
 
   const setTags = (newTags: ImageTag[]) => setFilters(state => ({ ...state, tags: newTags }));
+  const setMode = (newMode?: FilterMode) => setFilters(state => ({ ...state, mode: newMode }));
 
   return (
     <ControlBar direction="vertical" color={color}>
@@ -110,7 +111,12 @@ export function ViewSpeedDialControls({ color, direction }: ViewSpeedDialControl
           },
         }}
       >
-        <TagFilterControl tags={filters.tags ?? []} setTags={setTags} />
+        <TagFilterControl
+          tags={filters.tags ?? []}
+          setTags={setTags}
+          mode={filters.mode}
+          setMode={setMode}
+        />
       </SpeedDialSelector>
     </ControlBar>
   );

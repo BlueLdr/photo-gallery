@@ -4,6 +4,7 @@ export * from "../image/ImageGridItem";
 export * from "../image/ImageView";
 export * from "./ProgressIndicator";
 export * from "./ScrollButtons";
+export * from "./SeparatedList";
 export * from "./SkeletonFade";
 export * from "./Suspense";
 export * from "../image/Thumbnail";

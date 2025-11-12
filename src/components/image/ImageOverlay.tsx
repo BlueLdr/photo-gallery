@@ -1,28 +1,39 @@
 import { alpha } from "@mui/material/styles";
 
+import { SeparatedList } from "~/components/common";
+
+import { getMetadataDisplayValue } from "./utils";
+
+import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 
 import type { BoxProps } from "@mui/material/Box";
 import type { ImageMetadata } from "~/model";
 import type { WithOverrides } from "~/utils";
+import type { ImageDisplayableMetadataKey } from "./utils";
 
 //================================================
 
+export type ImageOverlayOptions = {
+  onClose?: () => void;
+  visible?: boolean;
+  onClickNext?: () => void;
+  onClickPrev?: () => void;
+  loading?: boolean;
+  index?: number;
+  total?: number;
+  meta?: Array<ImageDisplayableMetadataKey | ImageDisplayableMetadataKey[]>;
+};
+
 export type ImageOverlayProps = WithOverrides<
   BoxProps,
-  {
-    image: ImageMetadata;
-    onClose?: () => void;
-    visible?: boolean;
-    onClickNext?: () => void;
-    onClickPrev?: () => void;
-    loading?: boolean;
-  }
+  ImageOverlayOptions & { image?: ImageMetadata }
 >;
 
 export function ImageOverlay({
@@ -32,8 +43,12 @@ export function ImageOverlay({
   loading,
   onClickNext,
   onClickPrev,
+  index,
+  total,
+  meta,
   ...props
 }: ImageOverlayProps) {
+  const showMeta = !!meta?.length && image;
   return (
     <Box
       position="absolute"
@@ -58,11 +73,56 @@ export function ImageOverlay({
         ...props.sx,
       }}
     >
-      {onClose && (
-        <Box gridArea="header" m={2} justifySelf="flex-end">
-          <IconButton onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
+      {(onClose || showMeta) && (
+        <Box
+          display="flex"
+          justifyContent={showMeta ? "space-between" : "flex-end"}
+          sx={
+            !!meta?.length && image
+              ? {
+                  backgroundColor: theme => alpha(theme.palette.common.black, 0.6),
+                }
+              : undefined
+          }
+          width="100%"
+          gridColumn="span 3"
+        >
+          {showMeta && (
+            <Box
+              display="flex"
+              justifyContent="flex-start"
+              alignItems="flex-start"
+              flexDirection="column"
+              p={4}
+              gap={2}
+            >
+              {meta.map((line, i) => (
+                <Typography
+                  {...(i === 0
+                    ? {
+                        component: "header",
+                        variant: "subtitle1",
+                      }
+                    : {
+                        variant: "body2",
+                      })}
+                >
+                  {typeof line === "string" ? (
+                    getMetadataDisplayValue(image.meta, line)
+                  ) : (
+                    <SeparatedList>
+                      {line.map(key => getMetadataDisplayValue(image.meta, key))}
+                    </SeparatedList>
+                  )}
+                </Typography>
+              ))}
+            </Box>
+          )}
+          <Box m={2} justifySelf="flex-end">
+            <IconButton onClick={onClose}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </Box>
       )}
 
@@ -85,7 +145,7 @@ export function ImageOverlay({
             transition: theme => theme.transitions.create(["opacity", "background"]),
             "&:hover": {
               background: theme =>
-                `radial-gradient(farthest-side at 0 50%, ${alpha(theme.palette.background.default, 0.6)}, ${alpha(theme.palette.background.default, 0)})`,
+                `radial-gradient(farthest-side at 0 50%, ${alpha(theme.palette.background.default, 0.4)}, ${alpha(theme.palette.background.default, 0)})`,
             },
           }}
         >
@@ -105,11 +165,21 @@ export function ImageOverlay({
             transition: theme => theme.transitions.create(["opacity", "background"]),
             "&:hover": {
               background: theme =>
-                `radial-gradient(farthest-side at 100% 50%, ${alpha(theme.palette.background.default, 0.6)}, ${alpha(theme.palette.background.default, 0)})`,
+                `radial-gradient(farthest-side at 100% 50%, ${alpha(theme.palette.background.default, 0.4)}, ${alpha(theme.palette.background.default, 0)})`,
             },
           }}
         >
           <ChevronRightIcon />
+        </Box>
+      )}
+
+      {index != null && total != null && (
+        <Box gridArea="footer" p={2} display="flex" alignItems="center" justifyContent="center">
+          <Chip
+            variant="filled"
+            sx={{ backgroundColor: theme => alpha(theme.palette.common.black, 0.7) }}
+            label={`${index + 1} / ${total}`}
+          />
         </Box>
       )}
     </Box>

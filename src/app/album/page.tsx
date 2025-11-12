@@ -10,7 +10,7 @@ import {
 import { ViewSpeedDialControls } from "~/components/controls";
 import { ImageMasonry, ImageModal } from "~/components/image";
 import { ViewContext, ViewStateProvider } from "~/context";
-import { createFuzzyImageSearch } from "~/model";
+import { createFuzzyImageSearch, FilterMode } from "~/model";
 
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
@@ -35,12 +35,17 @@ function AlbumContent({ imageData }: { imageData: ImageMetadata[] }) {
   const images = useMemo(() => {
     const searchResults = search ? imageSearch?.(search).map(r => r.item) : imageData;
     return filters.tags?.length
-      ? searchResults?.filter(img => img.meta.tags.some(tag => filters.tags?.includes(tag)))
+      ? searchResults?.filter(img => {
+          if (filters.mode === FilterMode.All) {
+            return filters.tags?.every(tag => img.meta.tags.includes(tag));
+          }
+          const anyMatches = filters.tags?.some(tag => img.meta.tags.includes(tag));
+          return filters.mode === FilterMode.Any ? anyMatches : !anyMatches;
+        })
       : searchResults;
-  }, [filters.tags, imageData, imageSearch, search]);
+  }, [filters.tags, filters.mode, imageData, imageSearch, search]);
 
   const curIndex = selectedImage ? images?.indexOf(selectedImage) : undefined;
-  console.log(`curIndex, images: `, curIndex, images);
 
   return (
     <Grid height="100%" position="relative">
@@ -50,16 +55,20 @@ function AlbumContent({ imageData }: { imageData: ImageMetadata[] }) {
       <ImageModal
         image={selectedImage}
         closeModal={() => setSelectedImage(undefined)}
-        {...(curIndex != null && images
-          ? {
-              showNextImage:
-                curIndex < images.length - 1
-                  ? () => setSelectedImage(images[curIndex + 1])
-                  : undefined,
-              showPrevImage:
-                curIndex > 0 ? () => setSelectedImage(images[curIndex - 1]) : undefined,
-            }
-          : {})}
+        overlay={
+          curIndex != null && images
+            ? {
+                index: curIndex,
+                total: images.length,
+                onClickNext:
+                  curIndex < images.length - 1
+                    ? () => setSelectedImage(images[curIndex + 1])
+                    : undefined,
+                onClickPrev:
+                  curIndex > 0 ? () => setSelectedImage(images[curIndex - 1]) : undefined,
+              }
+            : {}
+        }
       />
       {layout === "grid" ? (
         <ImageGrid

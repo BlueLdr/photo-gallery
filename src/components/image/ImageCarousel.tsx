@@ -4,6 +4,7 @@ import { TransitionGroup } from "react-transition-group";
 
 import { ScrollButtons } from "~/components/common";
 import { ViewContext } from "~/context";
+import { useChangeEffect } from "~/utils";
 
 import { ImageGridItem } from "./ImageGridItem";
 import { ImageView } from "./ImageView";
@@ -19,6 +20,9 @@ import type { BoxProps } from "@mui/material/Box";
 import type { ImageMetadata } from "~/model";
 
 //================================================
+
+const didChange = (prev: ImageMetadata[], next: ImageMetadata[]) =>
+  prev.map(img => img.meta.path).join(",") !== next.map(img => img.meta.path).join(",");
 
 const StyledTransitionGroup = styled(TransitionGroup)({
   position: "relative",
@@ -42,6 +46,18 @@ export function ImageCarousel({ images, initialIndex = 0, ...props }: ImageCarou
   const [activeIndex, setActiveIndex] = useState(() => (images[initialIndex] ? initialIndex : 0));
   const [prevIndex, setPrevIndex] = useState<number>();
   const [nextIndex, setNextIndex] = useState<number>();
+
+  useChangeEffect(
+    (newValue, oldValue) => {
+      const activeImage = oldValue[activeIndex];
+      const newActiveIndex = newValue.findIndex(img => img.meta.path === activeImage?.meta.path);
+      if (activeIndex !== newActiveIndex) {
+        setActiveIndex(newActiveIndex >= 0 ? newActiveIndex : 0);
+      }
+    },
+    images,
+    { didChange },
+  );
 
   const goToNextImage = () => {
     setNextIndex(activeIndex + 1);
@@ -93,13 +109,14 @@ export function ImageCarousel({ images, initialIndex = 0, ...props }: ImageCarou
         display="grid"
         gridTemplateColumns="4rem minmax(0, 1fr) 4rem"
         gridTemplateRows="minmax(0, 1fr)"
-        justifyContent="space-around"
+        justifyContent="space-between"
         alignItems="center"
         gap={2}
         pt={4}
         flexWrap="nowrap"
         height="100%"
         tabIndex={0}
+        overflow="clip"
       >
         <Grid container alignItems="center" justifyContent="center">
           {activeIndex > 0 && (
@@ -110,7 +127,7 @@ export function ImageCarousel({ images, initialIndex = 0, ...props }: ImageCarou
         </Grid>
         <StyledTransitionGroup>
           <Slide
-            key={activeIndex}
+            key={images[activeIndex]?.meta.path}
             direction={direction}
             className={nextIndex != undefined ? "MuiSlide-out" : undefined}
             appear={!!direction}
@@ -126,17 +143,33 @@ export function ImageCarousel({ images, initialIndex = 0, ...props }: ImageCarou
           >
             <ImageView
               data={images[activeIndex]}
+              overlay={{
+                initialHidden: false,
+                index: activeIndex,
+                total: images.length,
+              }}
+              containerStyle={{
+                width: "max-content",
+                margin: "auto",
+                "&:has(.MuiSlide-out)": {
+                  position: "absolute",
+                  top: 0,
+                  left: "50%",
+                  transform: "translate(-50%)",
+                  zIndex: -1,
+                },
+              }}
               sx={{
                 height: "100%",
                 width: "100%",
                 objectFit: "contain",
-                [".PgImageView-container:not(:only-child):has(~ .PgImageView--loaded) > &.MuiSlide-out, " +
+                /*[".PgImageView-container:not(:only-child):has(~ .PgImageView--loaded) > &.MuiSlide-out, " +
                 ".PgImageView--loaded ~ .PgImageView-container:not(:only-child) > &.MuiSlide-out"]:
                   {
                     position: "absolute",
                     left: 0,
                     top: 0,
-                  },
+                  },*/
               }}
             />
           </Slide>

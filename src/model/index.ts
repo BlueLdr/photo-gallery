@@ -1,4 +1,4 @@
 export * from "./tag";
 export * from "./search";
 
-export type * from "./types";
+export * from "./types";
